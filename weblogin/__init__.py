@@ -32,7 +32,7 @@ class WebLoginBackend(object):
             asurite = vresult['principal']
             return get_user_with_asurite(asurite, 
                                          create=WEBAUTH_AUTOCREATE_USERS)
-        except asuwebauth.NotAuthenticatedError as e:
+        except webauth.NotAuthenticatedError as e:
             pass
         except Exception as e:
             LOG.error("Exception thrown authenticating, %s" % e)
