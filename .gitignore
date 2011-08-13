@@ -1,0 +1,10 @@
+*.pyc
+*~
+*.swp
+*.swo
+*.egg-info
+/.project
+/.pydevproject
+/.settings
+tags
+Session.vim
