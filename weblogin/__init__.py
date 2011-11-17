@@ -38,5 +38,6 @@ class WebLoginBackend(object):
         Bare-bones creation/retrieval of a user based on single sign-on ID.
         This is a prime candidate for customization in an inheriting class!
         '''
-        user, created = User.objects.get_or_create(username=asurite)
+        user, created = User.objects.get_or_create(username=asurite,
+                                                   defaults={ 'password': '!' })
         return user
