@@ -1,14 +1,9 @@
-import logging
-
 from django.contrib.auth.models import User
 from django.conf import settings
 import webauth
 
-LOG = logging.getLogger(__name__)
-
-WEBAUTH_HOST = getattr(settings, 'WEBAUTH_HOST')
-WEBAUTH_PORT = getattr(settings, 'WEBAUTH_PORT')
-WEBAUTH_AUTOCREATE_USERS = getattr(settings, 'WEBAUTH_AUTOCREATE_USERS', True)
+WEBAUTH_HOST = getattr(settings, 'WEBAUTH_HOST', 'webauth.asu.edu')
+WEBAUTH_PORT = getattr(settings, 'WEBAUTH_PORT', 3001)
 
 class WebLoginBackend(object):
     '''
@@ -17,26 +12,20 @@ class WebLoginBackend(object):
     retrieve their ASURITE, which is then used to look up a local user 
     account to authenticate.
     '''
-
     supports_object_permissions = False
     supports_anonymous_user = False
     supports_inactive_user = False
     
-    def authenticate(self, token=None, ip=None): 
+    def authenticate(self, token=None, ip=None):
         if not token: 
             return None
-
         try:
             verifier = webauth.Verifier(WEBAUTH_HOST, WEBAUTH_PORT)
             vresult = verifier.verify(token, ip)
             asurite = vresult['principal']
-            return get_user_with_asurite(asurite, 
-                                         create=WEBAUTH_AUTOCREATE_USERS)
+            return self.get_user_with_asurite(asurite)
         except webauth.NotAuthenticatedError as e:
-            pass
-        except Exception as e:
-            LOG.error("Exception thrown authenticating, %s" % e)
-        return None
+            return None
     
     def get_user(self, user_id):
         try:
@@ -44,13 +33,10 @@ class WebLoginBackend(object):
         except User.DoesNotExist:
             return None
 
-    def get_user_with_asurite(asurite, create=False):
+    def get_user_with_asurite(self, asurite):
         '''
-        Retrieve a local user object corresponding to the given ASURITE.  
+        Bare-bones creation/retrieval of a user based on single sign-on ID.
+        This is a prime candidate for customization in an inheriting class!
         '''
-        try:
-            return User.objects.get(username=asurite)
-        except User.DoesNotExist:
-            if not create:
-                return None
-            return User.objects.create(username=asurite)
+        user, created = User.objects.get_or_create(username=asurite)
+        return user

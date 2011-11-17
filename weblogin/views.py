@@ -2,7 +2,8 @@ from django.conf import settings
 from django.contrib import auth
 from django.http import HttpResponseRedirect
 
-WEBLOGIN_HOST = getattr(settings, 'WEBLOGIN_HOST')
+WEBLOGIN_HOST = getattr(settings, 'WEBLOGIN_HOST',
+                        'https://weblogin.asu.edu/cgi-bin/cas-login')
 WEBAUTH_TOKEN_COOKIE = getattr(settings, 'WEBAUTH_TOKEN_COOKIE', 'ASUWEBAUTH')
 
 def login(request):
@@ -21,9 +22,8 @@ def login(request):
         return HttpResponseRedirect(request.GET.get('next', '/'))
     else:
         return_page = request.build_absolute_uri()
-        return HttpResponseRedirect('%s?%s=%s' % (WEBLOGIN_HOST, 
-                                                  'callapp', 
-                                                  return_page))
+        return HttpResponseRedirect('%s?callapp=%s' % (WEBLOGIN_HOST, 
+                                                       return_page))
 
 def logout(request):
     '''
@@ -32,6 +32,5 @@ def logout(request):
     '''
     auth.logout(request)
     return_page = request.build_absolute_uri(request.GET.get('next', '/'))
-    return http.HttpResponseRedirect('%s?%s=%s' % (WEBLOGIN_HOST,
-                                                   'onLogoutURL',
-                                                   return_page))
+    return HttpResponseRedirect('%s?onLogoutURL=%s' % (WEBLOGIN_HOST,
+                                                       return_page))
