@@ -1,9 +1,9 @@
 Django Weblogin
 ===============
-Django auth backend for connecting to the Arizona State University single sign-on systems ([webauth/weblogin](http://asu.edu/webauth/implement.htm)).  This
-module was developed as a component of the [ASU Digital Repository](http://repository.asu.edu).
-
-[foo](davehughes/webauth)
+Django auth backend and views for connecting to the Arizona State University single sign-on systems 
+([webauth/weblogin](http://asu.edu/webauth/implement.htm)).  This module was developed as a component of the 
+[ASU Digital Repository](http://repository.asu.edu).  It requires the [webauth verify]
+(http://github.com/davehughes/webauth) module to function.
 
 ###Installation:
 ####Install packages:
