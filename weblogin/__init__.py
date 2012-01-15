@@ -1,9 +1,11 @@
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.conf import settings
 import webauth
 
 WEBAUTH_HOST = getattr(settings, 'WEBAUTH_HOST', 'webauth.asu.edu')
 WEBAUTH_PORT = getattr(settings, 'WEBAUTH_PORT', 3001)
+WEBAUTH_TOKEN_COOKIE = getattr(settings, 'WEBAUTH_TOKEN_COOKIE', 'ASUWEBAUTH')
 
 class WebLoginBackend(object):
     '''
@@ -41,3 +43,23 @@ class WebLoginBackend(object):
         user, created = User.objects.get_or_create(username=asurite,
                                                    defaults={ 'password': '!' })
         return user
+
+class WebLoginSSOMiddleware(object):
+    '''
+    Implement single sign-on for users who authenticated with an external
+    site.  Checks to see that if the user is already authenticated with 
+    Webauth and logs them into the system if so. 
+    
+    This must come after Django's AuthenticationMiddleware in the 
+    middleware stack.
+    '''
+    def process_request(self, request):
+        token = request.COOKIES.get(WEBAUTH_TOKEN_COOKIE)
+        if not token:
+            logout(request)
+        elif not request.user.is_authenticated():
+            user = authenticate(token=token, ip=request.META.get('REMOTE_ADDR'))
+            if user:
+                login(request, user)
+        return None
+
